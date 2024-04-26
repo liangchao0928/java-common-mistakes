@@ -10,8 +10,10 @@ import javax.annotation.PostConstruct;
 @Service
 @Slf4j
 public class UserService {
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private UserService self;
 
@@ -40,6 +42,11 @@ public class UserService {
         return userRepository.findByName(name).size();
     }
 
+    /**
+     * @Transactional 生效原则 1，除非特殊配置（比如使用 AspectJ 静态织入实现 AOP），否则只有定义在 public 方法上的 @Transactional 才能生效。
+     * 原因是，Spring 默认通过动态代理的方式实现 AOP，对目标方法进行增强，private 方法无法代理到，Spring 自然也无法动态增强事务处理逻辑。
+     * @param entity
+     */
     @Transactional
     private void createUserPrivate(UserEntity entity) {
         userRepository.save(entity);
@@ -47,6 +54,10 @@ public class UserService {
             throw new RuntimeException("invalid username!");
     }
 
+    /**
+     * 代理依然不生效，必须通过代理过的类从外部调用目标方法才能生效
+     * @param entity
+     */
     //可以传播出异常
     @Transactional
     public void createUserPublic(UserEntity entity) {
